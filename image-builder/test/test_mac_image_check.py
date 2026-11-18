@@ -832,5 +832,18 @@ class SyncDatabasesTest(unittest.TestCase):
                 with self.assertRaisesRegex(check.CheckError, message):
                     check.check_sync_databases(self.root)
 
+
+class ImagePackagesTest(unittest.TestCase):
+    def test_an_image_needs_the_aurora_tools(self):
+        packages = set(check.IMAGE_PACKAGES)
+        self.assertEqual(check.missing_image_packages(packages), [])
+        self.assertEqual(check.missing_image_packages(packages - {"aurora-scripts", "aurora-fwextract"}),
+                         ["aurora-fwextract", "aurora-scripts"])
+
+    def test_an_older_image_carries_the_asahi_names(self):
+        packages = set(check.IMAGE_PACKAGES) - {"aurora-scripts", "aurora-fwextract"} | {"asahi-scripts", "asahi-fwextract"}
+        self.assertEqual(check.missing_image_packages(packages), [])
+
+
 if __name__ == "__main__":
     unittest.main()

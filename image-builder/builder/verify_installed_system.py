@@ -242,6 +242,11 @@ AURORA_REPLACEMENTS = {
 }
 
 
+# The names an image built before omarchy-pkgs imported asahi-alarm's tools
+# carries for them.
+LEGACY_NAMES = {"aurora-fwextract": "asahi-fwextract"}
+
+
 def aurora_replaced(packages: dict[str, set[str]]) -> set[str]:
     """Names an installed exact Aurora replacement fills, when it provides them."""
     return {role for name, roles in AURORA_REPLACEMENTS.items() if name in packages
@@ -277,6 +282,7 @@ def check_packages(verification: Verification, root: Path, runtime_packages: fro
     installed = set(packages)
     filled = installed | {role for name in runtime_packages & installed for role in packages[name]}
     filled |= aurora_replaced(packages)
+    filled |= {name for name, legacy in LEGACY_NAMES.items() if legacy in installed}
     missing = [name for name in REQUIRED_PACKAGES if name not in filled]
     verification.record(
         "packages-required-present",
